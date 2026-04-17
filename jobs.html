@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>India Tech Job Directory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen p-4 md:p-10">
+    <div class="max-w-5xl mx-auto">
+        <div class="mb-10 text-center">
+            <h1 class="text-4xl font-extrabold text-slate-900 mb-2">India Tech Careers</h1>
+            <p class="text-slate-500">Searchable list of top company career portals.</p>
+        </div>
+
+        <div class="mb-6">
+            <input type="text" id="searchInput" placeholder="Search by company, city, or role..." 
+                class="w-full p-4 rounded-2xl border border-slate-200 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none text-lg">
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse" id="jobTable">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200">
+                            <th class="px-6 py-4 text-xs font-bold uppercase text-slate-400">Company</th>
+                            <th class="px-6 py-4 text-xs font-bold uppercase text-slate-400">Typical Roles</th>
+                            <th class="px-6 py-4 text-xs font-bold uppercase text-slate-400">Locations</th>
+                            <th class="px-6 py-4 text-xs font-bold uppercase text-slate-400">Link</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100" id="tableBody">
+                        <!-- Data injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const companies = [
+            { n: "Google", r: "SWE, Data/ML, Product, Cloud", l: "Hyderabad, Bengaluru, Pune", u: "https://careers.google.com" },
+            { n: "Microsoft", r: "SWE, Cloud, Product, Security", l: "Hyderabad, Bengaluru, Pune", u: "https://careers.microsoft.com" },
+            { n: "Amazon", r: "SWE, Ops, Data, AWS", l: "Hyderabad, Bengaluru", u: "https://amazon.jobs" },
+            { n: "Apple", r: "SWE, Hardware, Product", l: "Bengaluru, Hyderabad", u: "https://jobs.apple.com" },
+            { n: "Meta", r: "SWE, Data, AI", l: "Hyderabad, Remote", u: "https://metacareers.com" },
+            { n: "NVIDIA", r: "SWE, ML, DevRel", l: "Bengaluru", u: "https://nvidia.com/careers" },
+            { n: "Intel", r: "SWE, HW, Security", l: "Bengaluru, Hyderabad", u: "https://jobs.intel.com" },
+            { n: "Qualcomm", r: "SWE, Systems, RF", l: "Bengaluru", u: "https://qualcomm.com/careers" },
+            { n: "Salesforce", r: "SWE, Solutions, Sales", l: "Bengaluru, Mumbai", u: "https://careers.salesforce.com" },
+            { n: "Oracle", r: "Cloud, DB, Sales", l: "Bengaluru, Mumbai", u: "https://careers.oracle.com" },
+            { n: "SAP", r: "SWE, Product, Consulting", l: "Bengaluru, Pune", u: "https://jobs.sap.com" },
+            { n: "Cisco", r: "SWE, Network, Security", l: "Bengaluru", u: "https://jobs.cisco.com" },
+            { n: "IBM", r: "Cloud, SWE, Data", l: "Bengaluru, Pune", u: "https://ibm.com/careers" },
+            { n: "Accenture", r: "Tech & Consulting", l: "National", u: "https://accenture.com/in-en/careers" },
+            { n: "Deloitte", r: "Tech, Risk, Cyber", l: "Bengaluru, Mumbai", u: "https://deloitte.com/in/en/careers" },
+            { n: "TCS", r: "SWE, Digital, Ops", l: "National", u: "https://tcs.com/careers" },
+            { n: "Infosys", r: "SWE, Cloud, Data", l: "National", u: "https://infosys.com/careers" },
+            { n: "Adobe", r: "SWE, Data, Product", l: "Noida, Bengaluru", u: "https://adobe.com/in-en/careers" },
+            { n: "Flipkart", r: "SDE, Data, Product", l: "Bengaluru, Mumbai", u: "https://careers.flipkart.com" },
+            { n: "Zoho", r: "SWE, DevOps, Product", l: "Chennai, Tenkasi", u: "https://zoho.com/careers" },
+            { n: "PhonePe", r: "Product, Data, SWE", l: "Bengaluru", u: "https://phonepe.com/careers" },
+            { n: "Razorpay", r: "Product, SWE, Sales", l: "Bengaluru", u: "https://razorpay.com/careers" },
+            { n: "Zomato", r: "SWE, Data, Ops", l: "Gurgaon, Bengaluru", u: "https://zomato.com/careers" },
+            { n: "Swiggy", r: "SWE, Data, Ops", l: "Bengaluru", u: "https://swiggy.com/careers" },
+            { n: "Goldman Sachs", r: "Tech, Ops, Data", l: "Bengaluru, Mumbai", u: "https://goldmansachs.com/careers" },
+            { n: "JPMorgan", r: "Tech, Data, Risk", l: "Bengaluru, Mumbai", u: "https://careers.jpmorgan.com" }
+        ];
+
+        const tableBody = document.getElementById('tableBody');
+        const searchInput = document.getElementById('searchInput');
+
+        function renderTable(filter = '') {
+            tableBody.innerHTML = '';
+            const filtered = companies.filter(c => 
+                c.n.toLowerCase().includes(filter.toLowerCase()) || 
+                c.l.toLowerCase().includes(filter.toLowerCase()) ||
+                c.r.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            filtered.forEach(c => {
+                const row = `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-6 py-4 font-bold text-slate-800">${c.n}</td>
+                        <td class="px-6 py-4 text-sm text-slate-600">${c.r}</td>
+                        <td class="px-6 py-4 text-sm text-slate-500">${c.l}</td>
+                        <td class="px-6 py-4">
+                            <a href="${c.u}" target="_blank" class="text-blue-600 font-semibold hover:underline flex items-center gap-1">
+                                Apply
+                            </a>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        searchInput.addEventListener('input', (e) => renderTable(e.target.value));
+        renderTable();
+    </script>
+</body>
+</html>
